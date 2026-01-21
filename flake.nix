@@ -30,8 +30,18 @@
     pyproject-build-systems,
     ...
   }: let
+    systems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
+
     inherit (nixpkgs) lib;
-    forAllSystems = lib.genAttrs lib.systems.flakeExposed;
+    forAllSystems = lib.genAttrs systems;
+
+    # Parse pyproject.toml
+    projectName = (builtins.fromTOML (builtins.readFile ./pyproject.toml)).project.name;
 
     workspace = uv2nix.lib.workspace.loadWorkspace {workspaceRoot = ./.;};
 
