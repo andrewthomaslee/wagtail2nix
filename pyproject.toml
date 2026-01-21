@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.14"
 dependencies = [
+ "gunicorn>=23.0.0",
  "wagtail>=7.2.1",
 ]
 

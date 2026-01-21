@@ -94,28 +94,65 @@
     packages = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       virtualenv = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
+
+      manage = pkgs.stdenv.mkDerivation {
+        name = "manage";
+        src = ./src;
+        buildInputs = [virtualenv];
+        installPhase = ''
+          mkdir -p $out/app
+          cp -r $src/* $out/app/
+          chmod +x $out/app/manage.py
+        '';
+      };
+      entrypoint = pkgs.writeShellApplication {
+        name = "entrypoint";
+        runtimeInputs = [virtualenv];
+        text = ''
+          echo "Applying database migrations..."
+          python manage.py migrate --noinput
+
+          echo "Collecting static files..."
+          python manage.py collectstatic --noinput
+
+          echo "Starting Gunicorn..."
+          exec gunicorn main.wsgi:application \
+              --bind 0.0.0.0:8000 \
+              --workers 3 \
+              --log-level=info
+        '';
+      };
     in {
-      default = virtualenv;
-      container = pkgs.dockerTools.buildLayeredImage {
-        name = "${projectName}-container";
-        contents = [pkgs.curl];
+      inherit virtualenv;
+      default = pkgs.dockerTools.buildLayeredImage {
+        name = "wagtail-container";
+        contents = [pkgs.curl pkgs.busybox manage];
         enableFakechroot = true;
         fakeRootCommands = ''
           #!${pkgs.runtimeShell}
           ${pkgs.dockerTools.shadowSetup}
           groupadd -r wagtail
           useradd -r -g wagtail wagtail
-          mkdir /app
-          chown wagtail:wagtail /app
+          mkdir -p /app
+          mkdir -p /data/static
+          mkdir -p /data/media
+          chown -R wagtail:wagtail /app
+          chown -R wagtail:wagtail /data
         '';
         config = {
-          Cmd = ["${virtualenv}/bin/hello"];
+          Entrypoint = ["${entrypoint}/bin/entrypoint"];
           WorkingDir = "/app";
-          Volumes = {"/app" = {};};
+          Volumes = {"/data" = {};};
           User = "wagtail";
           ExposedPorts = {"8000/tcp" = {};};
+          Env = [
+            "PORT=8000"
+            "PYTHONUNBUFFERED=1"
+            "PYTHONDONTWRITEBYTECODE=1"
+            "DATA_DIR=/data"
+          ];
           Healthcheck = {
-            Test = ["CMD-SHELL" "curl -f http://localhost:8000/health || exit 1"];
+            Test = ["CMD-SHELL" "curl -f http://localhost:8000/ || exit 1"];
           };
         };
       };
