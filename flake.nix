@@ -33,8 +33,6 @@
     systems = [
       "x86_64-linux"
       "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
     ];
 
     inherit (nixpkgs) lib;
@@ -93,8 +91,34 @@
       }
     );
 
-    packages = forAllSystems (system: {
-      default = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
+    packages = forAllSystems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      virtualenv = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
+    in {
+      default = virtualenv;
+      container = pkgs.dockerTools.buildLayeredImage {
+        name = "${projectName}-container";
+        contents = [pkgs.curl];
+        enableFakechroot = true;
+        fakeRootCommands = ''
+          #!${pkgs.runtimeShell}
+          ${pkgs.dockerTools.shadowSetup}
+          groupadd -r wagtail
+          useradd -r -g wagtail wagtail
+          mkdir /app
+          chown wagtail:wagtail /app
+        '';
+        config = {
+          Cmd = ["${virtualenv}/bin/hello"];
+          WorkingDir = "/app";
+          Volumes = {"/app" = {};};
+          User = "wagtail";
+          ExposedPorts = {"8000/tcp" = {};};
+          Healthcheck = {
+            Test = ["CMD-SHELL" "curl -f http://localhost:8000/health || exit 1"];
+          };
+        };
+      };
     });
   };
 }
