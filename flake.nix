@@ -73,7 +73,7 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
         pythonSet = pythonSets.${system}.overrideScope editableOverlay;
-        virtualenv = pythonSet.mkVirtualEnv "hello-world-dev-env" workspace.deps.all;
+        virtualenv = pythonSet.mkVirtualEnv "${projectName}-dev-env" workspace.deps.all;
       in {
         default = pkgs.mkShell {
           packages = [
@@ -94,7 +94,7 @@
     );
 
     packages = forAllSystems (system: {
-      default = pythonSets.${system}.mkVirtualEnv "hello-world-env" workspace.deps.default;
+      default = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
     });
   };
 }
