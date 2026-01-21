@@ -41,3 +41,4 @@ dmypy.json
 .idea/
 .DS_Store
 nix/
+*.sqlite3
