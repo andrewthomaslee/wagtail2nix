@@ -95,7 +95,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       virtualenv = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
 
-      manage = pkgs.stdenv.mkDerivation {
+      src = pkgs.stdenv.mkDerivation {
         name = "manage";
         src = ./src;
         buildInputs = [virtualenv];
@@ -109,14 +109,14 @@
         name = "entrypoint";
         runtimeInputs = [virtualenv];
         text = ''
+          echo "Collecting static files..."
+          python manage.py collectstatic --noinput --clear
+
           echo "Applying database migrations..."
           python manage.py migrate --noinput
 
-          echo "Collecting static files..."
-          python manage.py collectstatic --noinput
-
           echo "Starting Gunicorn..."
-          exec gunicorn main.wsgi:application \
+          gunicorn main.wsgi:application \
               --bind 0.0.0.0:8000 \
               --workers 3 \
               --log-level=info
@@ -126,7 +126,7 @@
       inherit virtualenv;
       default = pkgs.dockerTools.buildLayeredImage {
         name = "wagtail-container";
-        contents = [pkgs.curl pkgs.busybox manage];
+        contents = [pkgs.curl pkgs.busybox src];
         enableFakechroot = true;
         fakeRootCommands = ''
           #!${pkgs.runtimeShell}
