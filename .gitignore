@@ -38,6 +38,7 @@ dmypy.json
 .env
 .env.*
 !.env.example
+!.env.dev
 .idea/
 .DS_Store
 nix/

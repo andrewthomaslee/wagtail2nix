@@ -30,14 +30,11 @@ COPY ./src /src
 RUN uv sync --frozen
 
 # Ensure wagtail owns the app files and virtual environment
-RUN chown -R wagtail:wagtail /src /.venv
+RUN chown -R wagtail:wagtail /src /.venv && chmod +x /src/entrypoint.sh
 WORKDIR /src
 USER wagtail
 
 EXPOSE 8000
-
 HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=3 CMD curl -f http://0.0.0.0:8000/ || exit 1
 
-ENTRYPOINT []
-
-CMD ["uv", "run", "sh", "-c", "python manage.py migrate --noinput && python manage.py init_admin && python manage.py runserver 0.0.0.0:8000"]
+ENTRYPOINT ["/src/entrypoint.sh"]

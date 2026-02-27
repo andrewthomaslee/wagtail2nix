@@ -1,0 +1,8 @@
+services:
+  wagtail:
+    depends_on:
+      - db
+
+  db:
+    image: postgres:18-alpine
+    restart: always

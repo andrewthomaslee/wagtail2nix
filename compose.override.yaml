@@ -1,0 +1,26 @@
+services:
+  wagtail:
+    image: andrewthomaslee/wagtail2nix:latest  
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - wagtail2nix_data:/data
+    env_file:
+      - .env
+    depends_on:
+      - db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wagtail.rule=Host(`wagtail.netsam.dev`)"
+      - "traefik.http.services.wagtail.loadbalancer.server.port=8000"
+
+  db:
+    volumes:
+      - wagtail2nix_postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+
+volumes:
+  wagtail2nix_postgres_data:
+  wagtail2nix_data:

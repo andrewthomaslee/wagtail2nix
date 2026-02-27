@@ -100,8 +100,17 @@
         name = "entrypoint";
         runtimeInputs = [virtualenv];
         text = ''
+          echo "Waiting for postgres..."
+          while ! python -c "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect(('$POSTGRES_HOST', int('$POSTGRES_PORT'))); s.close()" 2>/dev/null; do
+            sleep 0.1
+          done
+          echo "PostgreSQL started"
+
           echo "Collecting static files..."
           python manage.py collectstatic --noinput --clear
+
+          echo "Making database migrations..."
+          python manage.py makemigrations --noinput
 
           echo "Applying database migrations..."
           python manage.py migrate --noinput
@@ -158,6 +167,7 @@
             "PYTHONUNBUFFERED=1"
             "PYTHONDONTWRITEBYTECODE=1"
             "DATA_DIR=/data"
+            "DJANGO_SETTINGS_MODULE=main.settings.production"
           ];
           Healthcheck.Test = ["CMD-SHELL" "curl -f http://localhost:8000/ || exit 1"];
         };
