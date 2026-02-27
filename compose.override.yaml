@@ -27,13 +27,7 @@ services:
       - "traefik.http.routers.wagtail2nix.tls.options=cloudflare-mtls@file"
       - "traefik.http.services.wagtail2nix.loadbalancer.server.port=8000"
       - "traefik.http.services.wagtail2nix.loadbalancer.passhostheader=true"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/", "||", "exit", "1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 90s
-      
+      - "traefik.docker.network=proxy"
 
   db:
     networks:
