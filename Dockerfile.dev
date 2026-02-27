@@ -1,0 +1,43 @@
+FROM python:3.14-slim-trixie
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install UV
+ADD https://astral.sh/uv/0.9.25/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh && mv /root/.local/bin/uv /usr/local/bin/uv
+
+# Setup User and Directories
+RUN groupadd --system wagtail && \
+    useradd --system -g wagtail --create-home wagtail && \
+    mkdir -p /src /data/static /data/media && \
+    chown -R wagtail:wagtail /src /data
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000 \
+    DATA_DIR=/data
+
+
+COPY pyproject.toml uv.lock .
+RUN uv sync --frozen --no-install-project
+
+# Copy the rest of the code
+COPY ./src /src
+RUN uv sync --frozen
+
+# Ensure wagtail owns the app files and virtual environment
+RUN chown -R wagtail:wagtail /src /.venv
+WORKDIR /src
+USER wagtail
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=3 CMD curl -f http://0.0.0.0:8000/ || exit 1
+
+ENTRYPOINT []
+
+CMD ["uv", "run", "sh", "-c", "python manage.py migrate --noinput && python manage.py init_admin && python manage.py runserver 0.0.0.0:8000"]

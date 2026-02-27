@@ -74,6 +74,7 @@
         virtualenv = pythonSet.mkVirtualEnv "${projectName}-dev-env" workspace.deps.all;
       in {
         default = pkgs.mkShell {
+          buildInputs = [pkgs.bash];
           packages = [
             virtualenv
             pkgs.uv
@@ -95,16 +96,6 @@
       pkgs = nixpkgs.legacyPackages.${system};
       virtualenv = pythonSets.${system}.mkVirtualEnv "${projectName}-env" workspace.deps.default;
 
-      src = pkgs.stdenv.mkDerivation {
-        name = "manage";
-        src = ./src;
-        buildInputs = [virtualenv];
-        installPhase = ''
-          mkdir -p $out/app
-          cp -r $src/* $out/app/
-          chmod +x $out/app/manage.py
-        '';
-      };
       entrypoint = pkgs.writeShellApplication {
         name = "entrypoint";
         runtimeInputs = [virtualenv];
@@ -125,11 +116,25 @@
               --log-level=info
         '';
       };
+      package = pkgs.stdenv.mkDerivation {
+        name = "package";
+        src = ./src;
+        buildInputs = [virtualenv];
+        installPhase = ''
+          mkdir -p $out/app
+          cp -r $src/* $out/app/
+          chmod +x $out/app/manage.py
+
+          mkdir -p $out/bin
+          cp ${entrypoint}/bin/entrypoint $out/bin/entrypoint
+          chmod +x $out/bin/entrypoint
+        '';
+      };
     in {
-      inherit virtualenv;
+      inherit virtualenv package;
       default = pkgs.dockerTools.buildLayeredImage {
         name = "wagtail-container";
-        contents = [pkgs.curl pkgs.busybox src];
+        contents = [pkgs.curl pkgs.busybox package];
         enableFakechroot = true;
         fakeRootCommands = ''
           #!${pkgs.runtimeShell}
@@ -143,7 +148,7 @@
           chown -R wagtail:wagtail /data
         '';
         config = {
-          Entrypoint = ["${entrypoint}/bin/entrypoint"];
+          Entrypoint = ["/bin/entrypoint"];
           WorkingDir = "/app";
           Volumes = {"/data" = {};};
           User = "wagtail";
@@ -154,9 +159,7 @@
             "PYTHONDONTWRITEBYTECODE=1"
             "DATA_DIR=/data"
           ];
-          Healthcheck = {
-            Test = ["CMD-SHELL" "curl -f http://localhost:8000/ || exit 1"];
-          };
+          Healthcheck.Test = ["CMD-SHELL" "curl -f http://localhost:8000/ || exit 1"];
         };
       };
     });
