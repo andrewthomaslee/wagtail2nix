@@ -17,8 +17,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wagtail2nix.rule=Host(`wagtail.netsam.dev`)"
+      - "traefik.http.routers.wagtail2nix.entrypoints=websecure"
+      - "traefik.http.routers.wagtail2nix.rule=Host(`wagtail2nix.netsam.dev`)"
+      - "traefik.http.routers.wagtail2nix.service=wagtail2nix"
+      - "traefik.http.routers.wagtail2nix.tls=true"
+      - "traefik.http.routers.wagtail2nix.tls.options=cloudflare-mtls@file"
       - "traefik.http.services.wagtail2nix.loadbalancer.server.port=8000"
+      - "traefik.http.services.wagtail2nix.loadbalancer.passhostheader=true"
 
   db:
     volumes:
