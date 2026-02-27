@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - wagtail2nix_data:/data
+    networks:
+      - proxy
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
@@ -39,3 +41,7 @@ services:
 volumes:
   wagtail2nix_postgres_data:
   wagtail2nix_data:
+
+networks:
+  proxy:
+    external: true
