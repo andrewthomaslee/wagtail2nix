@@ -27,6 +27,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     DATA_DIR=/data
+    DJANGO_SETTINGS_MODULE=main.settings.production
 
 RUN apk add --no-cache curl
 
