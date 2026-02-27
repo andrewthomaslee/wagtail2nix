@@ -8,18 +8,19 @@ services:
       - wagtail2nix_data:/data
     env_file:
       - .env
-    depends_on:
-      - db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wagtail.rule=Host(`wagtail.netsam.dev`)"
-      - "traefik.http.services.wagtail.loadbalancer.server.port=8000"
+      - "traefik.http.routers.wagtail2nix.rule=Host(`wagtail.netsam.dev`)"
+      - "traefik.http.services.wagtail2nix.loadbalancer.server.port=8000"
 
   db:
     volumes:
       - wagtail2nix_postgres_data:/var/lib/postgresql/data/
     env_file:
       - .env
+    labels:
+      - "tsdproxy.enable=true"
+      - "tsdproxy.name=wagtail2nix-postgres"
 
 volumes:
   wagtail2nix_postgres_data:
