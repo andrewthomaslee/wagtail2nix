@@ -8,6 +8,7 @@ services:
       - wagtail2nix_data:/data
     networks:
       - proxy
+      - wagtail2nix
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
@@ -26,8 +27,17 @@ services:
       - "traefik.http.routers.wagtail2nix.tls.options=cloudflare-mtls@file"
       - "traefik.http.services.wagtail2nix.loadbalancer.server.port=8000"
       - "traefik.http.services.wagtail2nix.loadbalancer.passhostheader=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8000/", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+      
 
   db:
+    networks:
+      - wagtail2nix
     volumes:
       - wagtail2nix_postgres_data:/var/lib/postgresql
     environment:
@@ -37,6 +47,12 @@ services:
     labels:
       - "tsdproxy.enable=true"
       - "tsdproxy.name=wagtail2nix-postgres"
+    healthcheck:
+        test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 60s
 
 volumes:
   wagtail2nix_postgres_data:
@@ -45,3 +61,5 @@ volumes:
 networks:
   proxy:
     external: true
+  wagtail2nix:
+    name: wagtail2nix
