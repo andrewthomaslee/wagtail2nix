@@ -18,6 +18,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-main.settings.dev}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wagtail2nix.entrypoints=websecure"
