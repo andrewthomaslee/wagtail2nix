@@ -11,13 +11,13 @@ services:
       - wagtail2nix
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
-      - POSTGRES_ENGINE=${POSTGRES_ENGINE}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-0.0.0.0 127.0.0.1 [::1] wagtail2nix.netsam.dev}
+      - POSTGRES_ENGINE=${POSTGRES_ENGINE:-django.db.backends.postgresql_psycopg2}
+      - POSTGRES_HOST=${POSTGRES_HOST:-db}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER:-wagtail}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-wagtail}
+      - POSTGRES_DB=${POSTGRES_DB:-wagtail}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-main.settings.dev}
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-https://wagtail2nix.netsam.dev}
     labels:
@@ -37,9 +37,9 @@ services:
     volumes:
       - wagtail2nix_postgres_data:/var/lib/postgresql
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER:-wagtail}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-wagtail}
+      - POSTGRES_DB=${POSTGRES_DB:-wagtail}
     labels:
       - "tsdproxy.enable=true"
       - "tsdproxy.name=wagtail2nix-postgres"
