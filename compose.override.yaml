@@ -48,11 +48,11 @@ services:
       - "tsdproxy.enable=true"
       - "tsdproxy.name=wagtail2nix-postgres"
     healthcheck:
-        test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
-        interval: 10s
-        timeout: 5s
-        retries: 3
-        start_period: 60s
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
 volumes:
   wagtail2nix_postgres_data:
