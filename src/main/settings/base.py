@@ -22,6 +22,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR))
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
