@@ -11,10 +11,6 @@ STORAGES["staticfiles"]["BACKEND"] = (
     "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 )
 
-csrf_trusted_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
-if csrf_trusted_origins_env:
-    CSRF_TRUSTED_ORIGINS = csrf_trusted_origins_env.split(" ")
-
 try:
     from .local import *
 except ImportError:
