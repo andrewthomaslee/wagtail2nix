@@ -66,7 +66,7 @@ To start wagtail and postgres containers for production:
 docker compose -f compose.yaml -f compose.override.yaml up -d
 ```
 
-## Kubernetes
+## Kubernetes (WORK IN PROGRESS)
 To start wagtail and postgres containers for production:
 
 ```bash
