@@ -1,0 +1,33 @@
+{
+    "name": "nix-devcontainer",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "version": "latest"
+        },
+        "ghcr.io/devcontainers/features/nix:1": {
+            "version": "latest",
+            "extraNixConfig": "experimental-features = nix-command flakes"
+        },
+        "ghcr.io/tailscale/codespace/tailscale": {
+            "version": "latest"
+        }
+    },
+    "mounts": [
+        {
+            "source": "/var/run/docker.sock",
+            "target": "/var/run/docker.sock",
+            "type": "bind"
+        }
+    ],
+    "postCreateCommand": "nix develop",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "jnoortheen.nix-ide",
+                "Tailscale.vscode-tailscale",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}

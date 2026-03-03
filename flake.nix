@@ -73,7 +73,7 @@
         pythonSet = pythonSets.${system}.overrideScope editableOverlay;
         virtualenv = pythonSet.mkVirtualEnv "${projectName}-dev-env" workspace.deps.all;
       in {
-        default = pkgs.mkShell {
+        pure = pkgs.mkShell {
           buildInputs = [pkgs.bash];
           packages = [
             virtualenv
@@ -87,6 +87,20 @@
           shellHook = ''
             unset PYTHONPATH
             export REPO_ROOT=$(git rev-parse --show-toplevel)
+          '';
+        };
+        default = pkgs.mkShell {
+          packages = [
+            pkgs.uv
+          ];
+          env = {
+            UV_PYTHON = pythonSet.python.interpreter;
+            UV_PYTHON_DOWNLOADS = "never";
+          };
+          shellHook = ''
+            unset PYTHONPATH
+            export REPO_ROOT=$(git rev-parse --show-toplevel)
+            uv sync
           '';
         };
       }
