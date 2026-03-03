@@ -2,7 +2,7 @@ services:
   devcontainer:
     image: mcr.microsoft.com/devcontainers/base:ubuntu
     volumes:
-      - ../.:/workspaces:cached
+      - ../.:/workspace:cached
     network_mode: service:db
     command: sleep infinity
     depends_on:

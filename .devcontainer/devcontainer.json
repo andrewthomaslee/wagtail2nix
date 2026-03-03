@@ -2,7 +2,7 @@
     "name": "nix-devcontainer",
     "dockerComposeFile": "compose.yaml",
     "service": "devcontainer",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "workspaceFolder": "/workspace",
     "features": {
         "ghcr.io/devcontainers/features/nix:1": {
             "version": "latest",
