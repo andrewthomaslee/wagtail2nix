@@ -1,0 +1,25 @@
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    volumes:
+      - ../.:/workspaces:cached
+    network_mode: service:db
+    command: sleep infinity
+    depends_on:
+      - db
+    env_file:
+      - .env.dev
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - wagtail_postgres_data_dev:/var/lib/postgresql
+    env_file:
+      - .env.dev
+
+
+volumes:
+  wagtail_postgres_data_dev:
