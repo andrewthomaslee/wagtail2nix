@@ -91,6 +91,7 @@
         };
         default = pkgs.mkShell {
           packages = [
+            pythonSet.python
             pkgs.uv
           ];
           env = {
