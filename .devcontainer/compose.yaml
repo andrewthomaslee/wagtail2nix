@@ -25,5 +25,5 @@ services:
 
 
 volumes:
-  wagtail_postgres_data_dev:
+  wagtail2nix_postgres_data_dev:
   wagtail2nix_data_dev:
