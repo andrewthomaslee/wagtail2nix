@@ -2,7 +2,7 @@
     "name": "nix-devcontainer",
     "dockerComposeFile": "compose.yaml",
     "service": "devcontainer",
-    "workspaceFolder": "/workspace",
+    "workspaceFolder": "/workspace/wagtail2nix",
     "features": {
         "ghcr.io/devcontainers/features/nix:1": {
             "version": "latest",
